@@ -69,7 +69,10 @@ def combine_sources(mal, al):
 
     j_data["type"] = mal["type"]
 
-    j_data["episodes"] = mal["episodes"]
+    try:
+        j_data["episodes"] = int(mal["episodes"])
+    except ValueError:
+        j_data["episodes"] = 0
 
     j_data["status"] = mal["status"]
 
@@ -78,7 +81,8 @@ def combine_sources(mal, al):
 
     if al["season"] != None: j_data["season"]["season"] = al["season"]
     if al["seasonYear"] != None: j_data["season"]["year"] = al["seasonYear"]
-    if None in (al["season"], al["seasonYear"]):
+    if (None in (al["season"], al["seasonYear"]))\
+        and (j_data["aired"]["start"] != None):
         sseason, syear = date_to_season(j_data["aired"]["start"])
         j_data["season"]["season"] = sseason
         j_data["season"]["year"] = syear
@@ -147,7 +151,10 @@ def mal_all(mal):
 
     j_data["type"] = mal["type"]
 
-    j_data["episodes"] = mal["episodes"]
+    try:
+        j_data["episodes"] = int(mal["episodes"])
+    except ValueError:
+        j_data["episodes"] = 0
 
     j_data["status"] = mal["status"]
 
@@ -156,9 +163,8 @@ def mal_all(mal):
 
     if "premiered" in mal.keys():
         j_data["season"], j_data["year"] = mal["premiered"].split()
-    else:
+    elif j_data["aired"]["start"] != None:
         j_data["season"], j_data["year"] = date_to_season(j_data["aired"]["start"])
-
 
     j_data["category"]["demographic"] = mal.get("demographic", "")
     j_data["category"]["theme"] = mal.get("theme", "")
