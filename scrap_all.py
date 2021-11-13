@@ -5,10 +5,10 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 import requests
 
+import utils
+from utils.download import download
 from MyAnimeListPy import MyAnimeList
-import MyAnimeListPy.utils
 import anilist_query as al_query
-from MyAnimeListPy.utils.download import download
 
 
 def run():
@@ -36,7 +36,7 @@ def run():
             # Looping through each anime in the page
             for elem in soup.select("a[id^='sinfo']"):
                 title = elem.select_one("strong").text
-                MAL_id = MyAnimeListPy.utils.get_id(elem["href"])    # extract MAL id from url
+                MAL_id = utils.get_id(elem["href"])    # extract MAL id from url
 
                 # Skip old entries
                 if (base_path / f"{MAL_id}.json").exists():
@@ -54,7 +54,7 @@ def run():
                 AL_metadata = al_query.query_idMal(MAL_id)
 
                 # Combine MAL and AniList metadata (create function to do so).
-                all_metadata = MyAnimeListPy.utils.combine_sources(MAL_metadata, AL_metadata)
+                all_metadata = utils.combine_sources(MAL_metadata, AL_metadata)
                 
                 # print(all_metadata)
                 # print(json.dumps(all_metadata))
