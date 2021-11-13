@@ -1,0 +1,3 @@
+[submodule "MyAnimeListPy"]
+	path = MyAnimeListPy
+	url = https://github.com/amen-wondwosen/MyAnimeListPy.git
