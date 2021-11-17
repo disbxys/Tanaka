@@ -8,11 +8,12 @@ import requests
 from MyAnimeListPy import MyAnimeList
 import MyAnimeListPy.utils
 import anilist_query as al_query
-from MyAnimeListPy.utils.download import download
+import utils
+from utils.download import download
 
 
 def run():
-    base_path = Path("./db/mal_files v1/")
+    base_path = Path("./db/mal_files/")
     base_path.mkdir(exist_ok=True, parents=True)
 
     base_url = "https://myanimelist.net/anime.php?o=9&c%5B0%5D=a&c%5B1%5D=d&cv=2&w=1&show={}"
@@ -23,9 +24,18 @@ def run():
     search_results = 0
     results_url = base_url
 
+    # How many old entries should the program see before
+    # stopping the program
+    max_old_entries = 500
+
     while True:
 
-        results_url = results_url.format(search_results)
+        # stop program if threshold reached
+        if max_old_entries <= 0:
+            print("Threshold for old entries reached.\nQuitting program.")
+            return
+
+        results_url = base_url.format(search_results)
 
         # skip bad pages
         if not mal_client.validate_url(results_url): return
@@ -35,14 +45,15 @@ def run():
 
         # Looping through each anime in the page
         for elem in soup.select("a[id^='sinfo']"):
-            print("------------------------")
+            # print("------------------------")
             title = elem.select_one("strong").text
             MAL_id = MyAnimeListPy.utils.get_id(elem["href"])    # extract MAL id from url
 
             # Skip old entries
             if (base_path / f"{MAL_id}.json").exists():
-                print(f"Scrapped all new entries.\nQuitting program...")
-                return
+                    print(f'Skipping "{MAL_id}" | <{title}>...')
+                    max_old_entries -= 1 # decrement the threshold
+                    continue
 
             # Get information from MAL and parse it
             print(f'Scrapping from MAL "{MAL_id}" | <{title}>...')
@@ -53,14 +64,16 @@ def run():
             AL_metadata = al_query.query_idMal(MAL_id)
 
             # Combine MAL and AniList metadata (create function to do so).
-            all_metadata = MyAnimeListPy.utils.combine_sources(MAL_metadata, AL_metadata)
+            all_metadata = utils.combine_sources(MAL_metadata, AL_metadata)
 
             try:
+                print("------------------------")
                 # Write the metadata to a json file, using the MAL id as the
                 # filename.
                 print(f"Dumping <{title}>...")
                 with (base_path / f"{MAL_id}.json").open("w+", encoding="utf-8") as outfile:
                     outfile.write(json.dumps(all_metadata, indent=4, ensure_ascii=False))
+                print("------------------------")
             except Exception as e:
                 # Ensure incomplete files are deleted.
                 print("Dumping interrupted. Deleting file.")
@@ -70,6 +83,7 @@ def run():
     
         # Look for the next 50 results
         search_results += 50
+        print("------------------------")
 
 
 if __name__ == '__main__':
