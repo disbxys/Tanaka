@@ -11,9 +11,13 @@ import anilist_query as al_query
 import utils
 from utils.download import download
 
+DEFAULT_BASE_PATH = Path("./db/mal_files/")
+# Number of entries per page * max number of pages to search
+THRESHOLD = 50 * 3
 
-def run():
-    base_path = Path("./db/mal_files/")
+def run(base_path=DEFAULT_BASE_PATH, limit:int=THRESHOLD):
+    if not isinstance(base_path, Path):
+        base_path = Path(base_path)
     base_path.mkdir(exist_ok=True, parents=True)
 
     base_url = "https://myanimelist.net/anime.php?o=9&c%5B0%5D=a&c%5B1%5D=d&cv=2&w=1&show={}"
@@ -24,14 +28,10 @@ def run():
     search_results = 0
     results_url = base_url
 
-    # How many old entries should the program see before
-    # stopping the program
-    max_old_entries = 500
-
     while True:
 
-        # stop program if threshold reached
-        if max_old_entries <= 0:
+        # stop program if limit reached
+        if limit <= 0:
             print("Threshold for old entries reached.\nQuitting program.")
             return
 
@@ -52,7 +52,7 @@ def run():
             # Skip old entries
             if (base_path / f"{MAL_id}.json").exists():
                     print(f'Skipping "{MAL_id}" | <{title}>...')
-                    max_old_entries -= 1 # decrement the threshold
+                    limit -= 1 # decrement limit for every old entry discovered
                     continue
 
             # Get information from MAL and parse it
@@ -67,7 +67,6 @@ def run():
             all_metadata = utils.combine_sources(MAL_metadata, AL_metadata)
 
             try:
-                print("------------------------")
                 # Write the metadata to a json file, using the MAL id as the
                 # filename.
                 print(f"Dumping <{title}>...")

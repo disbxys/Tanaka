@@ -10,9 +10,11 @@ from utils.download import download
 from MyAnimeListPy import MyAnimeList
 import anilist_query as al_query
 
+DEFAULT_BASE_PATH = Path("./db/mal_files/")
 
-def run():
-    base_path = Path("./db/mal_files/")
+def run(base_path=DEFAULT_BASE_PATH):
+    if not isinstance(base_path, Path):
+        base_path = Path(base_path)
     base_path.mkdir(exist_ok=True, parents=True)
 
     base_url = "https://myanimelist.net/anime.php?letter={}&show={}"
