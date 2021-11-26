@@ -162,9 +162,9 @@ def mal_all(mal):
     j_data["aired"]["start"], j_data["aired"]["end"] = airing_date
 
     if "premiered" in mal.keys():
-        j_data["season"], j_data["year"] = mal["premiered"].split()
+        j_data["season"]["season"], j_data["season"]["year"] = mal["premiered"].split()
     elif j_data["aired"]["start"] != None:
-        j_data["season"], j_data["year"] = date_to_season(j_data["aired"]["start"])
+        j_data["season"]["season"], j_data["season"]["year"] = date_to_season(j_data["aired"]["start"])
 
     j_data["category"]["demographic"] = mal.get("demographic", "")
     j_data["category"]["theme"] = mal.get("theme", "")
