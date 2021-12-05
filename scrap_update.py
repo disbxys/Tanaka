@@ -12,10 +12,12 @@ import utils
 from utils.download import download
 
 DEFAULT_BASE_PATH = Path("./db/mal_files/")
-# Number of entries per page * max number of pages to search
-THRESHOLD = 50 * 3
+# max number of pages to search
+PAGE_THRESHOLD = 3
+# number of entries per page
+ITEMS_PER_PAGE = 50
 
-def run(base_path=DEFAULT_BASE_PATH, limit:int=THRESHOLD):
+def run(base_path=DEFAULT_BASE_PATH, page_limit:int=PAGE_THRESHOLD):
     if not isinstance(base_path, Path):
         base_path = Path(base_path)
     base_path.mkdir(exist_ok=True, parents=True)
@@ -24,9 +26,11 @@ def run(base_path=DEFAULT_BASE_PATH, limit:int=THRESHOLD):
 
     mal_client = MyAnimeList(None)
     
-    # for letter in search_list:
     search_results = 0
     results_url = base_url
+
+    # how many old entries to find before stopping
+    limit = page_limit * ITEMS_PER_PAGE
 
     while True:
 
