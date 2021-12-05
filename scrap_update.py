@@ -20,7 +20,11 @@ ITEMS_PER_PAGE = 50
 def run(base_path=DEFAULT_BASE_PATH, page_limit:int=PAGE_THRESHOLD):
     if not isinstance(base_path, Path):
         base_path = Path(base_path)
-    base_path.mkdir(exist_ok=True, parents=True)
+    
+    if (not base_path.exists()) or (base_path.is_file()):
+        print("Designated directory does not exist.")
+        print("Aborting program")
+        return
 
     base_url = "https://myanimelist.net/anime.php?o=9&c%5B0%5D=a&c%5B1%5D=d&cv=2&w=1&show={}"
 
