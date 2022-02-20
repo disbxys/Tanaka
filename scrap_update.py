@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+import sys
 
 from bs4 import BeautifulSoup
 import requests
@@ -94,4 +95,7 @@ def run(base_path=DEFAULT_BASE_PATH, page_limit:int=PAGE_THRESHOLD):
 
 
 if __name__ == '__main__':
-    run()
+    if len(sys.argv) > 1:
+        run(page_limit=int(sys.argv[1]))
+    else:
+        run()
