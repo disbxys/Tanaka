@@ -14,11 +14,11 @@ from utils.download import download
 
 DEFAULT_BASE_PATH = Path("./db/mal_files/")
 # max number of pages to search
-PAGE_THRESHOLD = 3
+DEFAULT_PAGE_LIMIT = 5
 # number of entries per page
 ITEMS_PER_PAGE = 50
 
-def run(base_path=DEFAULT_BASE_PATH, page_limit:int=PAGE_THRESHOLD):
+def run(base_path=DEFAULT_BASE_PATH, page_limit:int=DEFAULT_PAGE_LIMIT):
     if not isinstance(base_path, Path):
         base_path = Path(base_path)
     
