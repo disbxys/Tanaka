@@ -60,12 +60,12 @@ def run(base_path=DEFAULT_BASE_PATH, page_limit:int=DEFAULT_PAGE_LIMIT):
 
             # Skip old entries
             if (base_path / f"{MAL_id}.json").exists():
-                    print(f'Skipping "{MAL_id}" | <{title}>...')
+                    print(f'Skipping {MAL_id:6} | <{title}>...')
                     limit -= 1 # decrement limit for every old entry discovered
                     continue
 
             # Get information from MAL and parse it
-            print(f'Scrapping from MAL "{MAL_id}" | <{title}>...')
+            print(f'Scrapping from MAL {MAL_id:6} | <{title}>...')
             MAL_metadata = mal_client.get_anime(MAL_id).gather_data()
 
             # Use MAL id to query AniList.co.
