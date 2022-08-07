@@ -116,6 +116,9 @@ dmypy.json
 # custom files
 /db/
 
+# config file
+config.ini
+
 # sample files
 testest.py
 sample*
