@@ -1,3 +1,4 @@
+from configparser import ConfigParser
 import json
 import os
 from pathlib import Path
@@ -10,11 +11,9 @@ from utils.download import download
 from MyAnimeListPy import MyAnimeList
 import anilist_query as al_query
 
-DEFAULT_BASE_PATH = Path("./db/mal_files/")
-
-def run(base_path=DEFAULT_BASE_PATH):
+def run(base_path:Path):
     if not isinstance(base_path, Path):
-        base_path = Path(base_path)
+        base_path = Path(base_path).resolve()
     base_path.mkdir(exist_ok=True, parents=True)
 
     base_url = "https://myanimelist.net/anime.php?letter={}&show={}"
@@ -57,11 +56,6 @@ def run(base_path=DEFAULT_BASE_PATH):
 
                 # Combine MAL and AniList metadata (create function to do so).
                 all_metadata = utils.combine_sources(MAL_metadata, AL_metadata)
-                
-                # print(all_metadata)
-                # print(json.dumps(all_metadata))
-                # print(type(all_metadata))
-                # return
 
                 try:
                     # Write the metadata to a json file, using the MAL id as the
@@ -81,4 +75,12 @@ def run(base_path=DEFAULT_BASE_PATH):
 
 
 if __name__ == '__main__':
-    run()
+    config = ConfigParser()
+    if not os.path.exists("config.ini"):
+        config.read("example.config.ini")
+    else:        
+        config.read("config.ini")
+    
+    path = config["DB"]["Path"]
+    
+    run(path)

@@ -1,3 +1,4 @@
+from configparser import ConfigParser
 import json
 import os
 from pathlib import Path
@@ -12,20 +13,15 @@ import anilist_query as al_query
 import utils
 from utils.download import download
 
-DEFAULT_BASE_PATH = Path("./db/mal_files/")
 # max number of pages to search
 DEFAULT_PAGE_LIMIT = 5
 # number of entries per page
 ITEMS_PER_PAGE = 50
 
-def run(base_path=DEFAULT_BASE_PATH, page_limit:int=DEFAULT_PAGE_LIMIT):
+def run(base_path:Path, page_limit:int=DEFAULT_PAGE_LIMIT):
     if not isinstance(base_path, Path):
-        base_path = Path(base_path)
-    
-    if (not base_path.exists()) or (base_path.is_file()):
-        print("Designated directory does not exist.")
-        print("Aborting program")
-        return
+        base_path = Path(base_path).resolve()
+    base_path.mkdir(exist_ok=True, parents=True)
 
     base_url = "https://myanimelist.net/anime.php?o=9&c%5B0%5D=a&c%5B1%5D=d&cv=2&w=1&show={}"
 
@@ -95,7 +91,15 @@ def run(base_path=DEFAULT_BASE_PATH, page_limit:int=DEFAULT_PAGE_LIMIT):
 
 
 if __name__ == '__main__':
+    config = ConfigParser()
+    if not os.path.exists("config.ini"):
+        config.read("example.config.ini")
+    else:        
+        config.read("config.ini")
+    
+    path = config["DB"]["Path"]
+
     if len(sys.argv) > 1:
-        run(page_limit=int(sys.argv[1]))
+        run(path, page_limit=int(sys.argv[1]))
     else:
-        run()
+        run(path)
