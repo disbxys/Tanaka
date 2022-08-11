@@ -61,9 +61,8 @@ def run(base_path:Path, page_limit:int=DEFAULT_PAGE_LIMIT):
 
             # Skip old entries
             if (base_path / f"{MAL_id}.json").exists():
-                    print(f'Skipping {MAL_id:6} | <{title}>...')
-                    limit -= 1 # decrement limit for every old entry discovered
-                    continue
+                limit -= 1 # decrement limit for every old entry discovered
+                continue
 
             # Grab information from MAL and parse it
             print(f'Scrapping from MAL {MAL_id:6} | <{title}>...')

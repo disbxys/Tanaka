@@ -47,11 +47,7 @@ def run(base_path:Path):
                 MAL_id = utils.get_id(elem["href"])    # extract MAL id from url
 
                 # Skip old entries
-                if (base_path / f"{MAL_id}.json").exists():
-                    print(f'Skipping {MAL_id:6} | <{title}>...')
-                    continue
-                else:
-                    print("--------------------")
+                if (base_path / f"{MAL_id}.json").exists(): continue
 
                 # Get information from MAL and parse it
                 print(f'Scrapping from MAL {MAL_id:6} | <{title}>...')
