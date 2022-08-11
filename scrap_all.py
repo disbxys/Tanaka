@@ -8,9 +8,6 @@ from jikanpy import Jikan
 from requests_ratelimiter import Duration, RequestRate, Limiter, LimiterSession
 
 import utils
-from utils.download import download
-# from MyAnimeListPy import MyAnimeList
-import anilist_query as al_query
 
 def run(base_path:Path):
     if not isinstance(base_path, Path):
@@ -25,7 +22,6 @@ def run(base_path:Path):
     limiter = Limiter(mal_rate)
     
     session = LimiterSession(limiter=limiter)
-    # mal_client = MyAnimeList(None)
     jikan = Jikan(selected_base="https://api.jikan.moe/v4", session=session)
     
     for letter in search_list:
@@ -50,24 +46,15 @@ def run(base_path:Path):
                 if (base_path / f"{MAL_id}.json").exists(): continue
 
                 # Get information from MAL and parse it
-                print(f'Scrapping from MAL {MAL_id:6} | <{title}>...')
-                # MAL_metadata = mal_client.get_anime(MAL_id).gather_data()
                 MAL_metadata = jikan.anime(MAL_id)
                 MAL_metadata = utils.filter_metadata(MAL_metadata)
-
-                # Use MAL id to query AniList.co.
-                # print(f'Querying Anilist.co for <{title}>...')
-                # AL_metadata = al_query.query_idMal(MAL_id)
-
-                # Combine MAL and AniList metadata (create function to do so).
-                # all_metadata = utils.combine_sources(MAL_metadata, AL_metadata)
 
                 try:
                     # Write the metadata to a json file, using the MAL id as the
                     # filename.
-                    print(f"Dumping <{title}>...")
                     with (base_path / f"{MAL_id}.json").open("w+", encoding="utf-8") as outfile:
                         outfile.write(json.dumps(MAL_metadata, indent=4, ensure_ascii=False))
+                    print(f'Scrapped {MAL_id:6} | <{title}>...')
                 except Exception as e:
                     # Ensure incomplete files are deleted.
                     print("Dumping interrupted. Deleting file.")
