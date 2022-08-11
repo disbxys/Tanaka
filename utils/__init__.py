@@ -1,6 +1,9 @@
 from datetime import datetime
 from urllib.parse import urlparse
 
+import requests
+import requests.exceptions as rex
+
 
 def get_id(url):
     '''
@@ -11,6 +14,15 @@ def get_id(url):
         returns 12031
     '''
     return urlparse(url).path.split('/')[2]
+
+
+def validate_url(url:str) -> bool:
+    """Tests the connection to the given url"""
+    try:
+        requests.head(url).raise_for_status()
+        return True
+    except (rex.MissingSchema, rex.HTTPError):
+        return False
 
 
 def combine_sources(mal, al):
@@ -183,6 +195,24 @@ def mal_all(mal):
     j_data["rating"] = mal["rating"]
 
     return j_data
+
+
+def filter_metadata(metadata:dict) -> dict:
+    # Create a list of keywords to look for that do not contain relevant data
+    ban_list = [
+        "request_hash", "request_cached", "request_cache_expiry",
+        "API_DEPRECATION", "API_DEPRECATION_DATE", "API_DEPRECATION_INFO",
+        "jikan_url", "headers"
+    ]
+
+    sorted_data = dict()
+
+    # Add each keyword not in the ban list
+    for k, val in metadata.items():
+        if k not in ban_list:
+            sorted_data[k] = val
+
+    return sorted_data
 
 
 def parse_airing_date(airing_date):
