@@ -119,6 +119,9 @@ dmypy.json
 # config file
 config.ini
 
+# personal notes
+notes.txt
+
 # sample files
 testest.py
 sample*
