@@ -63,6 +63,7 @@ def run(base_path:Path, page_limit:int=DEFAULT_PAGE_LIMIT):
             try:
                 # Get information from MAL and parse it
                 MAL_metadata = jikan.anime(MAL_id)
+                MAL_metadata = utils.filter_metadata(MAL_metadata)
             except APIException as e:
                 if e.status_code == 408:
                     # If a timeout occurs, try one more
