@@ -5,6 +5,7 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 from jikanpy import Jikan
+from jikanpy.exceptions import APIException
 from requests_ratelimiter import Duration, RequestRate, Limiter, LimiterSession
 
 import utils
@@ -45,9 +46,17 @@ def run(base_path:Path):
                 # Skip old entries
                 if (base_path / f"{MAL_id}.json").exists(): continue
 
-                # Get information from MAL and parse it
-                MAL_metadata = jikan.anime(MAL_id)
-                MAL_metadata = utils.filter_metadata(MAL_metadata)
+                try:
+                    # Get information from MAL and parse it
+                    MAL_metadata = jikan.anime(MAL_id)
+                except APIException as e:
+                    if e.status_code == 408:
+                        # If a timeout occurs, try one more
+                        # time before raising the exception.
+                        MAL_metadata = jikan.anime(MAL_id)
+                        MAL_metadata = utils.filter_metadata(MAL_metadata)
+                    else:
+                        raise e
 
                 try:
                     # Write the metadata to a json file, using the MAL id as the
