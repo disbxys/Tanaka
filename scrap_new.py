@@ -4,9 +4,6 @@ import os
 from pathlib import Path
 import sys
 
-from bs4 import BeautifulSoup
-# from jikanpy import Jikan
-# from jikanpy.exceptions import APIException
 from requests_ratelimiter import Duration, RequestRate, Limiter, LimiterSession
 
 DEFAULT_PAGE_LIMIT = 5  # max number of pages to search
