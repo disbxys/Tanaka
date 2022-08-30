@@ -9,8 +9,6 @@ from bs4 import BeautifulSoup
 # from jikanpy.exceptions import APIException
 from requests_ratelimiter import Duration, RequestRate, Limiter, LimiterSession
 
-import utils
-
 DEFAULT_PAGE_LIMIT = 5  # max number of pages to search
 ITEMS_PER_PAGE = 50     # number of entries per page
 

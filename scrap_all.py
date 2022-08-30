@@ -5,8 +5,6 @@ from pathlib import Path
 
 from requests_ratelimiter import Duration, RequestRate, Limiter, LimiterSession
 
-import utils
-
 def run(base_path:Path):
     if not isinstance(base_path, Path):
         base_path = Path(base_path).resolve()
