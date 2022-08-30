@@ -3,9 +3,6 @@ import json
 import os
 from pathlib import Path
 
-from bs4 import BeautifulSoup
-from jikanpy import Jikan
-from jikanpy.exceptions import APIException
 from requests_ratelimiter import Duration, RequestRate, Limiter, LimiterSession
 
 import utils
@@ -15,65 +12,53 @@ def run(base_path:Path):
         base_path = Path(base_path).resolve()
     base_path.mkdir(exist_ok=True, parents=True)
 
-    base_url = "https://myanimelist.net/anime.php?letter={}&show={}"
-    search_list = ".ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    anime_endpoint = "https://api.jikan.moe/v4/anime"
 
-    # set rate limit for jikanpy
+    anime_params = {
+        "page": 1,
+        "order_by": "title"
+    }
+
+    # Set rate limit for Jikan API
     mal_rate = RequestRate(1, Duration.SECOND * 4)
     limiter = Limiter(mal_rate)
     
     session = LimiterSession(limiter=limiter)
-    jikan = Jikan(selected_base="https://api.jikan.moe/v4", session=session)
-    
-    for letter in search_list:
-        search_results = 0
 
-        while True:
 
-            results_url = base_url.format(letter, search_results)
+    while True:
+        req = session.get(anime_endpoint, params=anime_params)
+        resp = req.json()
 
-            # skip bad pages
-            if not utils.validate_url(results_url): break
+        current_page = resp["pagination"]["current_page"]
+        has_next_page = resp["pagination"]["has_next_page"]
 
-            req = session.get(results_url)    # the results page
-            soup = BeautifulSoup(req.content, "html.parser")
+        for anime in resp["data"]:
+            MAL_id = anime["mal_id"]
+            title = anime["title"]
 
-            # Looping through each anime in the page
-            for elem in soup.select("a[id^='sinfo']"):
-                title = elem.select_one("strong").text
-                MAL_id = utils.get_id(elem["href"])    # extract MAL id from url
+            # Skip old entries
+            if (base_path / f"{MAL_id}.json").exists(): continue
 
-                # Skip old entries
-                if (base_path / f"{MAL_id}.json").exists(): continue
+            MAL_metadata = anime
+            
+            try:
+                # Write the metadata to a json file, using the MAL id as the
+                # filename.
+                with (base_path / f"{MAL_id}.json").open("w+", encoding="utf-8") as outfile:
+                    outfile.write(json.dumps(MAL_metadata, indent=4, ensure_ascii=False))
+                print(f'Scrapped {MAL_id:<6} | <{title}>...')
+            except Exception as e:
+                # Ensure incomplete files are deleted.
+                print("Dumping interrupted. Deleting file.")
+                if (base_path / f"{MAL_id}.json").exists():
+                    os.remove((base_path / f"{MAL_id}.json"))
+                raise e
 
-                try:
-                    # Get information from MAL and parse it
-                    MAL_metadata = jikan.anime(MAL_id)
-                    MAL_metadata = utils.filter_metadata(MAL_metadata)
-                except APIException as e:
-                    if e.status_code == 408:
-                        # If a timeout occurs, try one more
-                        # time before raising the exception.
-                        MAL_metadata = jikan.anime(MAL_id)
-                        MAL_metadata = utils.filter_metadata(MAL_metadata)
-                    else:
-                        raise e
-
-                try:
-                    # Write the metadata to a json file, using the MAL id as the
-                    # filename.
-                    with (base_path / f"{MAL_id}.json").open("w+", encoding="utf-8") as outfile:
-                        outfile.write(json.dumps(MAL_metadata, indent=4, ensure_ascii=False))
-                    print(f'Scrapped {MAL_id:6} | <{title}>...')
-                except Exception as e:
-                    # Ensure incomplete files are deleted.
-                    print("Dumping interrupted. Deleting file.")
-                    if (base_path / f"{MAL_id}.json").exists():
-                        os.remove((base_path / f"{MAL_id}.json"))
-                    raise e
-        
-            # Look for the next 50 results
-            search_results += 50
+        if has_next_page:
+            anime_params["page"] = current_page + 1
+        else:
+            break
 
 
 if __name__ == '__main__':
