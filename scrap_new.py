@@ -5,8 +5,8 @@ from pathlib import Path
 import sys
 
 from bs4 import BeautifulSoup
-from jikanpy import Jikan
-from jikanpy.exceptions import APIException
+# from jikanpy import Jikan
+# from jikanpy.exceptions import APIException
 from requests_ratelimiter import Duration, RequestRate, Limiter, LimiterSession
 
 import utils
@@ -19,76 +19,54 @@ def run(base_path:Path, page_limit:int=DEFAULT_PAGE_LIMIT):
         base_path = Path(base_path).resolve()
     base_path.mkdir(exist_ok=True, parents=True)
 
-    base_url = "https://myanimelist.net/anime.php?o=9&c%5B0%5D=a&c%5B1%5D=d&cv=2&w=1&show={}"
+    anime_endpoint = "https://api.jikan.moe/v4/anime"
 
-    # set rate limit for jikanpy
+    anime_params = {
+        "page": 1,
+        "order_by": "mal_id",
+        "sort": "desc"
+    }
+
+    # Set rate limit for Jikan API
     mal_rate = RequestRate(1, Duration.SECOND * 4)
     limiter = Limiter(mal_rate)
-
-    session = LimiterSession(limiter=limiter)
-    jikan = Jikan(selected_base="https://api.jikan.moe/v4", session=session)
     
-    search_results = 0
-    results_url = base_url
+    session = LimiterSession(limiter=limiter)
 
-    # how many old entries to find before stopping
-    limit = page_limit * ITEMS_PER_PAGE
+    # Set a limit for how many pages to look at
+    while anime_params["page"] <= page_limit:
+        req = session.get(anime_endpoint, params=anime_params)
+        resp = req.json()
 
-    while True:
+        current_page = resp["pagination"]["current_page"]
+        has_next_page = resp["pagination"]["has_next_page"]
 
-        # stop program if limit reached
-        if limit <= 0:
-            print("Threshold for old entries reached.\nQuitting program.")
-            return
-
-        results_url = base_url.format(search_results)
-
-        # skip bad pages
-        if not utils.validate_url(results_url): return
-
-        req = session.get(results_url)    # the results page
-        soup = BeautifulSoup(req.content, "html.parser")
-
-        # Looping through each anime in the page
-        for elem in soup.select("a[id^='sinfo']"):
-            # print("------------------------")
-            title = elem.select_one("strong").text
-            MAL_id = utils.get_id(elem["href"])    # extract MAL id from url
+        for anime in resp["data"]:
+            MAL_id = anime["mal_id"]
+            title = anime["title"]
 
             # Skip old entries
-            if (base_path / f"{MAL_id}.json").exists():
-                limit -= 1 # decrement limit for every old entry discovered
-                continue
+            if (base_path / f"{MAL_id}.json").exists(): continue
 
-            try:
-                # Get information from MAL and parse it
-                MAL_metadata = jikan.anime(MAL_id)
-                MAL_metadata = utils.filter_metadata(MAL_metadata)
-            except APIException as e:
-                if e.status_code == 408:
-                    # If a timeout occurs, try one more
-                    # time before raising the exception.
-                    MAL_metadata = jikan.anime(MAL_id)
-                    MAL_metadata = utils.filter_metadata(MAL_metadata)
-                else:
-                    raise e
-
+            MAL_metadata = anime
+            
             try:
                 # Write the metadata to a json file, using the MAL id as the
                 # filename.
                 with (base_path / f"{MAL_id}.json").open("w+", encoding="utf-8") as outfile:
                     outfile.write(json.dumps(MAL_metadata, indent=4, ensure_ascii=False))
-                print(f'Scrapped {MAL_id:6} | <{title}>...')
+                print(f'Scrapped {MAL_id:<6} | <{title}>...')
             except Exception as e:
                 # Ensure incomplete files are deleted.
                 print("Dumping interrupted. Deleting file.")
                 if (base_path / f"{MAL_id}.json").exists():
                     os.remove((base_path / f"{MAL_id}.json"))
                 raise e
-            # return
-    
-        # Look for the next 50 results
-        search_results += 50
+
+        if has_next_page:
+            anime_params["page"] = current_page + 1
+        else:
+            break
 
 
 if __name__ == '__main__':
