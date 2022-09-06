@@ -71,7 +71,7 @@ if __name__ == '__main__':
     else:        
         config.read("config.ini")
     
-    path = config["DB"]["Path"]
+    path = config["DB"]["ANIME_DOWNLOAD_PATH"]
 
     if len(sys.argv) > 1:
         run(path, page_limit=int(sys.argv[1]))

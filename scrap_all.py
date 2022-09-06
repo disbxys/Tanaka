@@ -66,6 +66,6 @@ if __name__ == '__main__':
     else:        
         config.read("config.ini")
     
-    path = config["DB"]["Path"]
+    path = config["DB"]["ANIME_DOWNLOAD_PATH"]
     
     run(path)
