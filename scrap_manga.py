@@ -36,7 +36,7 @@ def run(base_path:Path):
             title = manga["title"]
 
             # Check if updating old file or creating new file
-            is_new = (base_path / f"{MAL_id}.json").exists()
+            is_existing = (base_path / f"{MAL_id}.json").exists()
 
             MAL_metadata = manga
             
@@ -46,10 +46,10 @@ def run(base_path:Path):
                 with (base_path / f"{MAL_id}.json").open("w+", encoding="utf-8") as outfile:
                     outfile.write(json.dumps(MAL_metadata, indent=4, ensure_ascii=False))
                 
-                if is_new:
-                    print(f'Scrapped {MAL_id:<6} | <{title}>.')
-                else:
+                if is_existing:
                     print(f'Updated {MAL_id:<6} | <{title}>.')
+                else:
+                    print(f'Scrapped {MAL_id:<6} | <{title}>.')
             except Exception as e:
                 # Ensure incomplete files are deleted.
                 print("Dumping interrupted. Deleting file.")
