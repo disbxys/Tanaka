@@ -35,8 +35,8 @@ def run(base_path:Path):
             MAL_id = anime["mal_id"]
             title = anime["title"]
 
-            # Skip old entries
-            if (base_path / f"{MAL_id}.json").exists(): continue
+            # Check if updating old file or creating new file
+            is_new = (base_path / f"{MAL_id}.json").exists()
 
             MAL_metadata = anime
             
@@ -45,7 +45,11 @@ def run(base_path:Path):
                 # filename.
                 with (base_path / f"{MAL_id}.json").open("w+", encoding="utf-8") as outfile:
                     outfile.write(json.dumps(MAL_metadata, indent=4, ensure_ascii=False))
-                print(f'Scrapped {MAL_id:<6} | <{title}>...')
+                
+                if is_new:
+                    print(f'Scrapped {MAL_id:<6} | <{title}>.')
+                else:
+                    print(f'Updated {MAL_id:<6} | <{title}>.')
             except Exception as e:
                 # Ensure incomplete files are deleted.
                 print("Dumping interrupted. Deleting file.")
