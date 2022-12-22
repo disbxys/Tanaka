@@ -122,6 +122,9 @@ config.ini
 # personal notes
 notes.txt
 
+# personal scripts
+Scripts/
+
 # sample files
 testest.py
 sample*
