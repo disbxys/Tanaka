@@ -82,7 +82,7 @@ def scrap_media(
                 with (base_path / f"{MAL_id}.json").open("w+", encoding="utf-8") as outfile:
                     outfile.write(json.dumps(MAL_metadata, indent=4, ensure_ascii=False))
 
-                if dest_path.exists():
+                if all_ and dest_path.exists():
                     # Updating existing media entry
                     LOGGER.info(f'Updated {MAL_id:<6} | <{title}>...')
                 else:
