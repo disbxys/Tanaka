@@ -7,7 +7,7 @@ from requests_ratelimiter import Duration, RequestRate, Limiter, LimiterSession
 
 from utils.logging import get_logger
 
-LOGGER = get_logger(__name__)
+LOGGER = get_logger(__name__, write_to_file=True)
 
 DEFAULT_PAGE_LIMIT = 5  # max number of pages to search
 VERSION = 4
@@ -73,7 +73,7 @@ def scrap_media(
 
             # Skip old entries only if looking at new entries
             if all_ != True and dest_path.exists():
-                LOGGER.debug(f'Skipped {MAL_id:<6} | <{title}>...')
+                # LOGGER.debug(f'Skipped {MAL_id:<6} | <{title}>...')
                 continue
             
             try:
