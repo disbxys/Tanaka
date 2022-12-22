@@ -1,2 +1,3 @@
 # Tanaka
-### *DISCLAIMER* : This is a personal project and is not meant to be used for illegal purposes.
+
+### *DISCLAIMER* : This is a personal project and is not encouraged to be used for illegal purposes.
