@@ -1,10 +1,7 @@
 from argparse import ArgumentParser
-from configparser import ConfigParser
-from enum import Enum
 import json
 import os
 from pathlib import Path
-import sys
 
 from requests_ratelimiter import Duration, RequestRate, Limiter, LimiterSession
 
@@ -21,9 +18,16 @@ def main(a:ArgumentParser):
     dest = Path(args.destination)
 
     scrap_media(
-        base_path=dest, page_limit=args.page_limit, media_type=args.media_type,
+        base_path=dest, page_limit=args.page_limit,
+        media_type=args.media_type, 
         all_=args.all
     )
+
+def get_mal_session() -> LimiterSession:
+    mal_rate = RequestRate(1, Duration.SECOND * 4)
+    limiter = Limiter(mal_rate)
+    session = LimiterSession(limiter=limiter)
+    return session
 
 def scrap_media(
         base_path:Path,
@@ -50,9 +54,7 @@ def scrap_media(
     }
 
     # Create session compliant with Jikan API
-    mal_rate = RequestRate(1, Duration.SECOND * 4)
-    limiter = Limiter(mal_rate)
-    session = LimiterSession(limiter=limiter)
+    session = get_mal_session()
 
     # If not looking at all pages, set a limit for how many
     # pages to look at.
@@ -69,7 +71,7 @@ def scrap_media(
 
             dest_path = base_path / f"{MAL_id}.json"
 
-            # Skip old entries
+            # Skip old entries only if looking at new entries
             if all_ != True and dest_path.exists():
                 LOGGER.debug(f'Skipped {MAL_id:<6} | <{title}>...')
                 continue
