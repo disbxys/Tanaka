@@ -8,7 +8,10 @@ def get_logger(name, filename=None, write_to_file:bool=False) -> logging.Logger:
     if write_to_file:
         if not os.path.exists("Logs"):
             os.makedirs("Logs")
-        fh = logging.FileHandler(f"Logs/{filename if filename else name}.log")
+        fh = logging.FileHandler(
+            f"Logs/{filename if filename else name}.log",
+            encoding="utf-8"
+        )
         fh.setLevel(logging.DEBUG)
         ff = logging.Formatter(
             "[%(asctime)s] %(name)s - %(levelname)s - %(message)s",
