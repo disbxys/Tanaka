@@ -79,7 +79,7 @@ def scrap_media(
             try:
                 # Write the metadata to a json file, using the MAL id as the
                 # filename.
-                with (base_path / f"{MAL_id}.json").open("w+", encoding="utf-8") as outfile:
+                with dest_path.open("w+", encoding="utf-8") as outfile:
                     outfile.write(json.dumps(MAL_metadata, indent=4, ensure_ascii=False))
 
                 if all_ and dest_path.exists():
@@ -95,7 +95,7 @@ def scrap_media(
             except Exception:
                 # Ensure incomplete files are deleted.
                 LOGGER.error("Dumping interrupted. Deleting file.")
-                if (base_path / f"{MAL_id}.json").exists():
+                if dest_path.exists():
                     os.remove((base_path / f"{MAL_id}.json"))
                 raise
 
