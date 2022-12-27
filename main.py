@@ -69,6 +69,7 @@ def scrap_media(
             MAL_id = MAL_metadata["mal_id"]
             title = MAL_metadata["title"]
 
+            # Build the filepath using the MAL id as the filename
             dest_path = base_path / f"{MAL_id}.json"
 
             # Skip old entries only if looking at new entries
@@ -77,8 +78,15 @@ def scrap_media(
                 continue
             
             try:
-                # Write the metadata to a json file, using the MAL id as the
-                # filename.
+                # Compare the data pulled to the existing copy
+                # and skip if there is no difference
+                if dest_path.exists():
+                    with dest_path.open("r", encoding="utf-8") as infile:
+                        local_data = json.load(infile)
+                    
+                    if MAL_metadata == local_data: continue
+
+                # Dump metadata to a json file
                 with dest_path.open("w+", encoding="utf-8") as outfile:
                     outfile.write(json.dumps(MAL_metadata, indent=4, ensure_ascii=False))
 
