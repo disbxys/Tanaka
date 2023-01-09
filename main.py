@@ -40,7 +40,7 @@ def scrap_media(
     # There is advanced file path verification, so a misspell
     # can cause files to be saved in the wrong directory.
     if not isinstance(base_path, Path):
-        base_path = base_path.resolve()
+        base_path = Path(base_path).resolve()
     base_path.mkdir(exist_ok=True, parents=True)
 
     jikan_endpoint = "https://api.jikan.moe/v{version}/{media_type}".format(
