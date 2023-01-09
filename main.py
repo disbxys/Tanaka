@@ -102,9 +102,7 @@ def scrap_media(
                 raise
             except Exception:
                 # Ensure incomplete files are deleted.
-                LOGGER.error("Dumping interrupted. Deleting file.")
-                if dest_path.exists():
-                    os.remove((base_path / f"{MAL_id}.json"))
+                LOGGER.error("Error encountered when creating file {}.".format(dest_path.name))
                 raise
 
         if has_next_page:
