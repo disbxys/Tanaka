@@ -15,7 +15,7 @@ def get_logger(name, filename=None, write_to_file:bool=False) -> logging.Logger:
         fh.setLevel(logging.DEBUG)
         ff = logging.Formatter(
             "[%(asctime)s] %(name)s - %(levelname)s - %(message)s",
-            datefmt="%Y-%m-%d %I:%M:%S"
+            datefmt="%Y-%m-%d %H:%M:%S"
         )
         fh.setFormatter(ff)
         logger.addHandler(fh)
@@ -24,7 +24,7 @@ def get_logger(name, filename=None, write_to_file:bool=False) -> logging.Logger:
     ch.setLevel(logging.INFO)
     cf = logging.Formatter(
         "[%(asctime)s] %(message)s",
-        datefmt="%I:%M:%S"
+        datefmt="%H:%M:%S"
     )
     ch.setFormatter(cf)
     logger.addHandler(ch)
