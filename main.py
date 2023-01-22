@@ -7,7 +7,7 @@ from requests_ratelimiter import Duration, RequestRate, Limiter, LimiterSession
 
 from utils.logging import get_logger
 
-LOGGER = get_logger(__name__, write_to_file=True)
+logger = get_logger(__name__, write_to_file=True)
 
 DEFAULT_PAGE_LIMIT = 5  # max number of pages to search
 VERSION = 4
@@ -92,17 +92,17 @@ def scrap_media(
 
                 if all_ and dest_path.exists():
                     # Updating existing media entry
-                    LOGGER.info(f'Updated {MAL_id:<6} | <{title}>...')
+                    logger.info(f'Updated {MAL_id:<6} | <{title}>...')
                 else:
                     # Adding new media entry
-                    LOGGER.info(f'Scrapped {MAL_id:<6} | <{title}>...')
+                    logger.info(f'Scrapped {MAL_id:<6} | <{title}>...')
             except KeyboardInterrupt:
                 # Manual terminal of program
-                LOGGER.error("Program interrupted by keyboard shorcut.")
+                logger.error("Program interrupted by keyboard shorcut.")
                 raise
             except Exception:
                 # Ensure incomplete files are deleted.
-                LOGGER.error("Error encountered when creating file {}.".format(dest_path.name))
+                logger.error("Error encountered when creating file {}.".format(dest_path.name))
                 raise
 
         if has_next_page:
