@@ -3,7 +3,7 @@ import os
 
 def get_logger(name, filename=None, write_to_file:bool=False) -> logging.Logger:
     logger = logging.getLogger(name)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
 
     if write_to_file:
         if not os.path.exists("Logs"):
