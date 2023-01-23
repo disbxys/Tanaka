@@ -15,7 +15,7 @@ DEFAULT_REQUEST_PARAMS = {
 }
 
 class JikanController:
-    logger = get_logger(__name__)
+    logger = get_logger(__name__, write_to_file=True)
     BASE_ENDPOINT = "https://api.jikan.moe"
 
     def __init__(
