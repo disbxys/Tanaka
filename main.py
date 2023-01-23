@@ -5,6 +5,7 @@ from pathlib import Path
 
 from requests_ratelimiter import Duration, RequestRate, Limiter, LimiterSession
 
+from api.myanimelist import JikanController
 from utils.logging import get_logger
 
 logger = get_logger(__name__, write_to_file=True)
@@ -43,31 +44,21 @@ def scrap_media(
         base_path = Path(base_path).resolve()
     base_path.mkdir(exist_ok=True, parents=True)
 
-    jikan_endpoint = "https://api.jikan.moe/v{version}/{media_type}".format(
-        version = VERSION,
-        media_type = media_type
-    )
-    jikan_params = {
-        "page": 1,
-        "order_by": sort_by,
-        "sort": "desc" if reverse else "asc"
-    }
-
-    # Create session compliant with Jikan API
-    session = get_mal_session()
+    # Create client to access to Jikan API
+    client = JikanController(version=VERSION)
 
     # If not looking at all pages, set a limit for how many
     # pages to look at.
-    while all_ or (jikan_params["page"] <= page_limit):
-        req = session.get(jikan_endpoint, params=jikan_params)
+    while all_ or (client.request_params["page"] <= page_limit):
+        req = client.request(media_type=media_type)
         resp = req.json()
 
         current_page = resp["pagination"]["current_page"]
         has_next_page = resp["pagination"]["has_next_page"]
 
-        for MAL_metadata in resp["data"]:
-            MAL_id = MAL_metadata["mal_id"]
-            title = MAL_metadata["title"]
+        for media_metadata in resp["data"]:
+            MAL_id = media_metadata["mal_id"]
+            title = media_metadata["title"]
 
             # Build the filepath using the MAL id as the filename
             dest_path = base_path / f"{MAL_id}.json"
@@ -84,11 +75,11 @@ def scrap_media(
                     with dest_path.open("r", encoding="utf-8") as infile:
                         local_data = json.load(infile)
                     
-                    if MAL_metadata == local_data: continue
+                    if media_metadata == local_data: continue
 
                 # Dump metadata to a json file
                 with dest_path.open("w+", encoding="utf-8") as outfile:
-                    outfile.write(json.dumps(MAL_metadata, indent=4, ensure_ascii=False))
+                    outfile.write(json.dumps(media_metadata, indent=4, ensure_ascii=False))
 
                 if all_ and dest_path.exists():
                     # Updating existing media entry
@@ -106,7 +97,7 @@ def scrap_media(
                 raise
 
         if has_next_page:
-            jikan_params["page"] = current_page + 1
+            client.update_request_params({"page": current_page + 1})
         else:
             break
 
