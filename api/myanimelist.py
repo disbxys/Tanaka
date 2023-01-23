@@ -39,6 +39,10 @@ class JikanController:
         self.session = session if session != None else self._create_session()
 
     def request(self, media_type:str="anime") -> requests.Response:
+        """
+        Given a media type (i.e. anime, manga, etc.), make a request to
+        the Jikan API search endpoint to get a list of entries.
+        """
         jikan_endpoint = urljoin(
             self.base_endpoint,
             "v{version}/{media_type}".format(
