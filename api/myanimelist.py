@@ -68,7 +68,7 @@ class JikanController:
 
     def update_request_params(self, params:Dict[str, Union[str, int]]) -> None:
         """
-        Updates requests params with the passed in params
+        Updates requests params with the passed in params.
         """
         self.request_params.update(params)
         self.logger.debug("Request parameters have been updated.")
@@ -76,11 +76,16 @@ class JikanController:
 
     def replace_request_params(self, params:Dict[str, Union[str, int]]) -> None:
         """
-        Replaces requests params with the passed in params
+        Replaces requests params with the passed in params.
         """
         self.request_params = params
         self.logger.debug("Request parameters have been replaced.")
         return
+
+    def reset_request_params(self) -> None:
+        """
+        Reset requests params to default request params.
+        """
 
     def _create_session(self) -> LimiterSession:
         mal_rate = RequestRate(1, Duration.SECOND * 4)
