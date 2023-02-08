@@ -32,10 +32,10 @@ def get_mal_session() -> LimiterSession:
 
 def scrap_media(
         base_path:Path,
-        page_limit:int=DEFAULT_PAGE_LIMIT,
-        media_type:str="anime",
-        sort_by:str="mal_id", reverse:bool=True,
-        all_:bool=False):
+        page_limit: int = DEFAULT_PAGE_LIMIT,
+        media_type: str = "anime",
+        sort_by: str = "mal_id", reverse: bool = True,
+        all_: bool = False):
     
     # Some maybe too lazy to manually create the directory.
     # There is advanced file path verification, so a misspell
@@ -92,7 +92,6 @@ def scrap_media(
                 logger.error("Program interrupted by keyboard shorcut.")
                 raise
             except Exception:
-                # Ensure incomplete files are deleted.
                 logger.error("Error encountered when creating file {}.".format(dest_path.name))
                 raise
 
